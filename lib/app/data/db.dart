@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
-
 part 'db.g.dart';
 
 @collection
@@ -39,6 +38,18 @@ class Tasks {
   });
 }
 
+// New enum for recurrence types
+enum RecurrenceType {
+  none(name: 'None'),
+  daily(name: 'Daily'),
+  weekly(name: 'Weekly'),
+  monthly(name: 'Monthly'),
+  yearly(name: 'Yearly');
+  
+  const RecurrenceType({required this.name});
+  final String name;
+}
+
 @collection
 class Todos {
   Id id;
@@ -53,6 +64,17 @@ class Todos {
   Priority priority;
   List<String> tags = [];
   int? index;
+  
+  // New fields for recurrence
+  bool isRecurring = false;
+  @enumerated
+  RecurrenceType recurrenceType = RecurrenceType.none;
+  int recurrenceInterval = 1; // e.g., every 1 day, every 2 weeks
+  List<int>? recurrenceDaysOfWeek; // For weekly recurrence (1-7 for Monday-Sunday)
+  int? recurrenceDayOfMonth; // For monthly recurrence
+  DateTime? recurrenceEndDate; // Optional end date for recurrence
+  int? recurrenceCount; // Optional number of occurrences
+  DateTime? originalDueDate; // To keep track of the original pattern
 
   final task = IsarLink<Tasks>();
 
@@ -68,6 +90,14 @@ class Todos {
     this.priority = Priority.none,
     this.tags = const [],
     this.index,
+    this.isRecurring = false,
+    this.recurrenceType = RecurrenceType.none,
+    this.recurrenceInterval = 1,
+    this.recurrenceDaysOfWeek,
+    this.recurrenceDayOfMonth,
+    this.recurrenceEndDate,
+    this.recurrenceCount,
+    this.originalDueDate,
   });
 }
 
@@ -78,7 +108,6 @@ enum Priority {
   none(name: 'noPriority');
 
   const Priority({required this.name, this.color});
-
   final String name;
   final Color? color;
 }
